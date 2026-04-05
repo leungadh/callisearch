@@ -259,7 +259,9 @@
 
       resultEl.innerHTML = `
         <div class="result-card">
-          <img src="${esc(r.image_url)}" alt="calligraphy image" />
+          <a href="${esc(r.image_url)}" target="_blank" rel="noopener">
+            <img src="${esc(r.image_url)}" alt="calligraphy image" style="cursor:zoom-in" />
+          </a>
           <div class="result-meta">
             <div class="label">詩文</div>
             <div class="poem-text">${highlightPoem(r.poem_text, currentChar)}</div>
