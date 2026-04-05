@@ -31,8 +31,8 @@ def client(populated_db, tmp_path):
     from server import create_app
     images_dir = str(tmp_path / "images")
     Path(images_dir).mkdir()
-    static_dir = "static"
-    Path(static_dir).mkdir(exist_ok=True)
+    static_dir = str(tmp_path / "static")
+    Path(static_dir).mkdir()
     (Path(static_dir) / "index.html").write_text("<html>test</html>")
     app = create_app(db_path=populated_db, images_dir=images_dir, static_dir=static_dir)
     return TestClient(app)
@@ -74,7 +74,7 @@ def test_search_uses_only_first_character(client):
     assert data["total"] == 1
 
 
-def test_search_returns_multiple_results(client):
+def test_search_different_character_returns_correct_result(client):
     # 間 shares an image with 人 (same post), so searching 間 also returns 1 result
     resp = client.get("/search?char=間")
     assert resp.status_code == 200
