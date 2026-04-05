@@ -37,8 +37,19 @@ def extract_posts(html_content: str) -> list[dict]:
         if not poem_text:
             continue
 
+        # Images are siblings of the text container, not children.
+        # Walk up to find the nearest ancestor that contains feedImage tags
+        # for exactly this post (stops before an ancestor shared with other posts).
+        container = post_el
+        for ancestor in post_el.parents:
+            imgs_in = ancestor.find_all("img", attrs={"data-imgperflogname": "feedImage"})
+            posts_in = ancestor.find_all(attrs={"data-ad-preview": "message"})
+            if imgs_in and len(posts_in) == 1:
+                container = ancestor
+                break
+
         images = []
-        for img in post_el.find_all(
+        for img in container.find_all(
             "img", attrs={"data-imgperflogname": "feedImage"}
         ):
             src = img.get("src", "")
