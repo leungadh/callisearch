@@ -181,6 +181,14 @@
       font-size: 0.95em;
     }
 
+    /* ── Highlight ── */
+    mark.highlight {
+      background: #f5e6a3;
+      color: #3a2010;
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+
     /* ── Empty state brush icon ── */
     #empty-state {
       text-align: center;
@@ -217,6 +225,7 @@
 
     let allResults  = [];
     let activeIndex = 0;
+    let currentChar = '';
 
     function esc(str) {
       return String(str)
@@ -224,6 +233,14 @@
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
+    }
+
+    function highlightPoem(text, char) {
+      const escaped = esc(text);
+      const escapedChar = esc(char);
+      return escaped.split(escapedChar).join(
+        `<mark class="highlight">${escapedChar}</mark>`
+      );
     }
 
     function showResult(index, keepStripOpen = false) {
@@ -245,7 +262,7 @@
           <img src="${esc(r.image_url)}" alt="calligraphy image" />
           <div class="result-meta">
             <div class="label">詩文</div>
-            <div class="poem-text">${esc(r.poem_text)}</div>
+            <div class="poem-text">${highlightPoem(r.poem_text, currentChar)}</div>
             <div class="count-line">
               ${index + 1} of ${total} image${total > 1 ? 's' : ''}
               ${total > 1 ? `&nbsp;·&nbsp;<button class="see-all-btn">see all ${total} →</button>` : ''}
@@ -295,6 +312,7 @@
           return;
         }
 
+        currentChar = char;
         allResults = data.results;
         showResult(0);
       } catch (err) {
