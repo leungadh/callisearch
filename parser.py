@@ -9,7 +9,7 @@ def is_poem_text(text: str) -> bool:
     return bool(_CHINESE_RE.search(text))
 
 
-def extract_posts(html_content: str) -> list:
+def extract_posts(html_content: str) -> list[dict]:
     """
     Parse HTML and return a list of dicts:
       {"poem_text": str, "images": [base64_str, ...]}

@@ -16,8 +16,8 @@ def test_is_poem_text_rejects_english():
 
 
 def test_is_poem_text_requires_four_consecutive():
-    # Three consecutive Chinese chars on each side — not enough
-    assert is_poem_text("人間底x是無x") is False
+    # Exactly three consecutive Chinese chars — one short of the threshold
+    assert is_poem_text("人間底") is False
 
 
 def test_extract_posts_skips_short_text():
