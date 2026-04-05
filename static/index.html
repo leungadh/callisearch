@@ -136,6 +136,17 @@
       text-decoration: underline;
     }
 
+    .see-all-btn {
+      background: none;
+      border: none;
+      color: #8b5e3c;
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: inherit;
+      font-family: inherit;
+      padding: 0;
+    }
+
     /* ── Thumbnail strip ── */
     #thumbnails {
       display: none;
@@ -207,7 +218,15 @@
     let allResults  = [];
     let activeIndex = 0;
 
-    function showResult(index) {
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function showResult(index, keepStripOpen = false) {
       activeIndex = index;
       const r = allResults[index];
       const total = allResults.length;
@@ -215,7 +234,7 @@
       const thumbsHtml = total > 1
         ? allResults.map((res, i) =>
             `<img class="thumb${i === index ? ' active' : ''}"
-                  src="${res.image_url}"
+                  src="${esc(res.image_url)}"
                   data-index="${i}"
                   alt="image ${i + 1}" />`
           ).join('')
@@ -223,13 +242,13 @@
 
       resultEl.innerHTML = `
         <div class="result-card">
-          <img src="${r.image_url}" alt="calligraphy image" />
+          <img src="${esc(r.image_url)}" alt="calligraphy image" />
           <div class="result-meta">
             <div class="label">詩文</div>
-            <div class="poem-text">${r.poem_text}</div>
+            <div class="poem-text">${esc(r.poem_text)}</div>
             <div class="count-line">
               ${index + 1} of ${total} image${total > 1 ? 's' : ''}
-              ${total > 1 ? `&nbsp;·&nbsp;<a onclick="toggleThumbs()">see all ${total} →</a>` : ''}
+              ${total > 1 ? `&nbsp;·&nbsp;<button class="see-all-btn">see all ${total} →</button>` : ''}
             </div>
           </div>
         </div>
@@ -237,8 +256,16 @@
       `;
 
       document.querySelectorAll('.thumb').forEach(t => {
-        t.addEventListener('click', () => showResult(Number(t.dataset.index)));
+        t.addEventListener('click', () => showResult(Number(t.dataset.index), true));
       });
+
+      if (keepStripOpen) {
+        const strip = document.getElementById('thumbnails');
+        if (strip) strip.classList.add('visible');
+      }
+
+      const seeAllBtn = resultEl.querySelector('.see-all-btn');
+      if (seeAllBtn) seeAllBtn.addEventListener('click', toggleThumbs);
     }
 
     function toggleThumbs() {
@@ -255,19 +282,27 @@
       emptyEl.style.display = 'none';
       resultEl.innerHTML = '';
 
-      const resp = await fetch(`/search?char=${encodeURIComponent(char)}`);
-      const data = await resp.json();
+      try {
+        const resp = await fetch(`/search?char=${encodeURIComponent(char)}`);
+        if (!resp.ok) throw new Error(`Server error: ${resp.status}`);
+        const data = await resp.json();
 
-      if (data.total === 0) {
+        if (data.total === 0) {
+          resultEl.innerHTML = `
+            <div class="not-found">
+              「${esc(char)}」— No calligraphy image found in this collection.
+            </div>`;
+          return;
+        }
+
+        allResults = data.results;
+        showResult(0);
+      } catch (err) {
         resultEl.innerHTML = `
           <div class="not-found">
-            「${char}」— No calligraphy image found in this collection.
+            Search failed. Please check the server is running.
           </div>`;
-        return;
       }
-
-      allResults = data.results;
-      showResult(0);
     }
 
     btn.addEventListener('click', doSearch);
