@@ -1,4 +1,7 @@
+import base64
 import re
+from pathlib import Path
+
 from bs4 import BeautifulSoup
 
 _CHINESE_RE = re.compile(r"[\u4e00-\u9fff]{4,}")
@@ -42,3 +45,8 @@ def extract_posts(html_content: str) -> list[dict]:
         posts.append({"poem_text": poem_text, "images": images})
 
     return posts
+
+
+def save_image(b64_data: str, filepath: Path) -> None:
+    """Decode base64 JPEG data and write it to filepath (overwrites if exists)."""
+    filepath.write_bytes(base64.b64decode(b64_data))

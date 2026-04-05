@@ -1,6 +1,7 @@
 import pytest
-from tests.helpers import FAKE_JPEG_B64, SAMPLE_HTML
-from parser import is_poem_text, extract_posts
+from pathlib import Path
+from tests.helpers import FAKE_JPEG, FAKE_JPEG_B64, SAMPLE_HTML
+from parser import is_poem_text, extract_posts, save_image
 
 
 def test_is_poem_text_accepts_long_chinese():
@@ -40,3 +41,16 @@ def test_extract_posts_image_counts():
 def test_extract_posts_image_data():
     posts = extract_posts(SAMPLE_HTML)
     assert posts[0]["images"][0] == FAKE_JPEG_B64
+
+
+def test_save_image_writes_correct_bytes(tmp_path):
+    dest = tmp_path / "out.jpg"
+    save_image(FAKE_JPEG_B64, dest)
+    assert dest.read_bytes() == FAKE_JPEG
+
+
+def test_save_image_overwrites_existing(tmp_path):
+    dest = tmp_path / "out.jpg"
+    dest.write_bytes(b"old content")
+    save_image(FAKE_JPEG_B64, dest)
+    assert dest.read_bytes() == FAKE_JPEG
