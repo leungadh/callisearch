@@ -62,7 +62,8 @@ def parse_file(
 ) -> None:
     """
     Parse an HTML file, extract posts, save images, and populate the database.
-    Safe to re-run: existing DB rows accumulate (no deduplication).
+    Posts and images accumulate on re-run. char_index deduplicates via INSERT OR IGNORE.
+    Posts with no images are stored in the posts table but not indexed (no char_index rows).
     """
     images_path = Path(images_dir)
     images_path.mkdir(exist_ok=True)

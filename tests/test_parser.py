@@ -1,7 +1,10 @@
-import pytest
+import sqlite3
 from pathlib import Path
+
+import pytest
+
+from parser import extract_posts, is_poem_text, parse_file, save_image
 from tests.helpers import FAKE_JPEG, FAKE_JPEG_B64, SAMPLE_HTML
-from parser import is_poem_text, extract_posts, save_image
 
 
 def test_is_poem_text_accepts_long_chinese():
@@ -54,10 +57,6 @@ def test_save_image_overwrites_existing(tmp_path):
     dest.write_bytes(b"old content")
     save_image(FAKE_JPEG_B64, dest)
     assert dest.read_bytes() == FAKE_JPEG
-
-
-import sqlite3
-from parser import parse_file
 
 
 def test_parse_file_creates_correct_post_count(tmp_db, tmp_images, sample_html_file):
